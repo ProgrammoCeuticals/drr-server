@@ -1,0 +1,1145 @@
+{
+  "id": "2e5b40f3-c87c-4d3f-889c-56c77b701aa8",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.DeskOfficerAction": {
+      "name": "DeskOfficerAction",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "mailId": {
+          "name": "mailId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "recordedById": {
+          "name": "recordedById",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "deskOfficerName": {
+          "name": "deskOfficerName",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "workNote": {
+          "name": "workNote",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dateCompleted": {
+          "name": "dateCompleted",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "DeskOfficerAction_mailId_key": {
+          "name": "DeskOfficerAction_mailId_key",
+          "columns": [
+            {
+              "expression": "mailId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "DeskOfficerAction_mailId_Mail_id_fk": {
+          "name": "DeskOfficerAction_mailId_Mail_id_fk",
+          "tableFrom": "DeskOfficerAction",
+          "tableTo": "Mail",
+          "columnsFrom": [
+            "mailId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "DeskOfficerAction_recordedById_User_id_fk": {
+          "name": "DeskOfficerAction_recordedById_User_id_fk",
+          "tableFrom": "DeskOfficerAction",
+          "tableTo": "User",
+          "columnsFrom": [
+            "recordedById"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.DirectorialRouting": {
+      "name": "DirectorialRouting",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "mailId": {
+          "name": "mailId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "minutedTo": {
+          "name": "minutedTo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "directiveComment": {
+          "name": "directiveComment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "targetDivisionId": {
+          "name": "targetDivisionId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "directiveDate": {
+          "name": "directiveDate",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "recordedById": {
+          "name": "recordedById",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "DirectorialRouting_mailId_key": {
+          "name": "DirectorialRouting_mailId_key",
+          "columns": [
+            {
+              "expression": "mailId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "DirectorialRouting_mailId_Mail_id_fk": {
+          "name": "DirectorialRouting_mailId_Mail_id_fk",
+          "tableFrom": "DirectorialRouting",
+          "tableTo": "Mail",
+          "columnsFrom": [
+            "mailId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "DirectorialRouting_targetDivisionId_Division_id_fk": {
+          "name": "DirectorialRouting_targetDivisionId_Division_id_fk",
+          "tableFrom": "DirectorialRouting",
+          "tableTo": "Division",
+          "columnsFrom": [
+            "targetDivisionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "DirectorialRouting_recordedById_User_id_fk": {
+          "name": "DirectorialRouting_recordedById_User_id_fk",
+          "tableFrom": "DirectorialRouting",
+          "tableTo": "User",
+          "columnsFrom": [
+            "recordedById"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.DivisionProcessing": {
+      "name": "DivisionProcessing",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "mailId": {
+          "name": "mailId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "divisionId": {
+          "name": "divisionId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "recordedById": {
+          "name": "recordedById",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ddName": {
+          "name": "ddName",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hodHouName": {
+          "name": "hodHouName",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deskOfficerName": {
+          "name": "deskOfficerName",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "dateReceived": {
+          "name": "dateReceived",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dateAssigned": {
+          "name": "dateAssigned",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "remark": {
+          "name": "remark",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "DivisionProcessing_mailId_key": {
+          "name": "DivisionProcessing_mailId_key",
+          "columns": [
+            {
+              "expression": "mailId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "DivisionProcessing_mailId_Mail_id_fk": {
+          "name": "DivisionProcessing_mailId_Mail_id_fk",
+          "tableFrom": "DivisionProcessing",
+          "tableTo": "Mail",
+          "columnsFrom": [
+            "mailId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "DivisionProcessing_divisionId_Division_id_fk": {
+          "name": "DivisionProcessing_divisionId_Division_id_fk",
+          "tableFrom": "DivisionProcessing",
+          "tableTo": "Division",
+          "columnsFrom": [
+            "divisionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "DivisionProcessing_recordedById_User_id_fk": {
+          "name": "DivisionProcessing_recordedById_User_id_fk",
+          "tableFrom": "DivisionProcessing",
+          "tableTo": "User",
+          "columnsFrom": [
+            "recordedById"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.Division": {
+      "name": "Division",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "Division_code_key": {
+          "name": "Division_code_key",
+          "columns": [
+            {
+              "expression": "code",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.HodHouReview": {
+      "name": "HodHouReview",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "mailId": {
+          "name": "mailId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "recordedById": {
+          "name": "recordedById",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hodHouName": {
+          "name": "hodHouName",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "remark": {
+          "name": "remark",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dateReviewed": {
+          "name": "dateReviewed",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "HodHouReview_mailId_key": {
+          "name": "HodHouReview_mailId_key",
+          "columns": [
+            {
+              "expression": "mailId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "HodHouReview_mailId_Mail_id_fk": {
+          "name": "HodHouReview_mailId_Mail_id_fk",
+          "tableFrom": "HodHouReview",
+          "tableTo": "Mail",
+          "columnsFrom": [
+            "mailId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "HodHouReview_recordedById_User_id_fk": {
+          "name": "HodHouReview_recordedById_User_id_fk",
+          "tableFrom": "HodHouReview",
+          "tableTo": "User",
+          "columnsFrom": [
+            "recordedById"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.MailClosure": {
+      "name": "MailClosure",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "mailId": {
+          "name": "mailId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "closedById": {
+          "name": "closedById",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "closureRemark": {
+          "name": "closureRemark",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dateClosed": {
+          "name": "dateClosed",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "MailClosure_mailId_key": {
+          "name": "MailClosure_mailId_key",
+          "columns": [
+            {
+              "expression": "mailId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "MailClosure_mailId_Mail_id_fk": {
+          "name": "MailClosure_mailId_Mail_id_fk",
+          "tableFrom": "MailClosure",
+          "tableTo": "Mail",
+          "columnsFrom": [
+            "mailId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "MailClosure_closedById_User_id_fk": {
+          "name": "MailClosure_closedById_User_id_fk",
+          "tableFrom": "MailClosure",
+          "tableTo": "User",
+          "columnsFrom": [
+            "closedById"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.MailDispatch": {
+      "name": "MailDispatch",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "mailId": {
+          "name": "mailId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dispatchedById": {
+          "name": "dispatchedById",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "targetDivisionId": {
+          "name": "targetDivisionId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dispatchDate": {
+          "name": "dispatchDate",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "remark": {
+          "name": "remark",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "MailDispatch_mailId_key": {
+          "name": "MailDispatch_mailId_key",
+          "columns": [
+            {
+              "expression": "mailId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "MailDispatch_mailId_Mail_id_fk": {
+          "name": "MailDispatch_mailId_Mail_id_fk",
+          "tableFrom": "MailDispatch",
+          "tableTo": "Mail",
+          "columnsFrom": [
+            "mailId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "MailDispatch_dispatchedById_User_id_fk": {
+          "name": "MailDispatch_dispatchedById_User_id_fk",
+          "tableFrom": "MailDispatch",
+          "tableTo": "User",
+          "columnsFrom": [
+            "dispatchedById"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "MailDispatch_targetDivisionId_Division_id_fk": {
+          "name": "MailDispatch_targetDivisionId_Division_id_fk",
+          "tableFrom": "MailDispatch",
+          "tableTo": "Division",
+          "columnsFrom": [
+            "targetDivisionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.MailTimeline": {
+      "name": "MailTimeline",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "mailId": {
+          "name": "mailId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "action": {
+          "name": "action",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fromStatus": {
+          "name": "fromStatus",
+          "type": "MailStatus",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "toStatus": {
+          "name": "toStatus",
+          "type": "MailStatus",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "performedById": {
+          "name": "performedById",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "MailTimeline_mailId_createdAt_idx": {
+          "name": "MailTimeline_mailId_createdAt_idx",
+          "columns": [
+            {
+              "expression": "mailId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "createdAt",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "MailTimeline_mailId_Mail_id_fk": {
+          "name": "MailTimeline_mailId_Mail_id_fk",
+          "tableFrom": "MailTimeline",
+          "tableTo": "Mail",
+          "columnsFrom": [
+            "mailId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "MailTimeline_performedById_User_id_fk": {
+          "name": "MailTimeline_performedById_User_id_fk",
+          "tableFrom": "MailTimeline",
+          "tableTo": "User",
+          "columnsFrom": [
+            "performedById"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.Mail": {
+      "name": "Mail",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "companyApplicant": {
+          "name": "companyApplicant",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "subject": {
+          "name": "subject",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "MailStatus",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'REGISTERED'"
+        },
+        "targetDivisionId": {
+          "name": "targetDivisionId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "currentHolderId": {
+          "name": "currentHolderId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdById": {
+          "name": "createdById",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "Mail_code_key": {
+          "name": "Mail_code_key",
+          "columns": [
+            {
+              "expression": "code",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "Mail_targetDivisionId_Division_id_fk": {
+          "name": "Mail_targetDivisionId_Division_id_fk",
+          "tableFrom": "Mail",
+          "tableTo": "Division",
+          "columnsFrom": [
+            "targetDivisionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "Mail_currentHolderId_User_id_fk": {
+          "name": "Mail_currentHolderId_User_id_fk",
+          "tableFrom": "Mail",
+          "tableTo": "User",
+          "columnsFrom": [
+            "currentHolderId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "Mail_createdById_User_id_fk": {
+          "name": "Mail_createdById_User_id_fk",
+          "tableFrom": "Mail",
+          "tableTo": "User",
+          "columnsFrom": [
+            "createdById"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.User": {
+      "name": "User",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "passwordHash": {
+          "name": "passwordHash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "Role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "divisionId": {
+          "name": "divisionId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "User_email_key": {
+          "name": "User_email_key",
+          "columns": [
+            {
+              "expression": "email",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "User_divisionId_Division_id_fk": {
+          "name": "User_divisionId_Division_id_fk",
+          "tableFrom": "User",
+          "tableTo": "Division",
+          "columnsFrom": [
+            "divisionId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.MailStatus": {
+      "name": "MailStatus",
+      "schema": "public",
+      "values": [
+        "REGISTERED",
+        "DIRECTOR_ROUTED",
+        "DISPATCHED_TO_DIVISION",
+        "ASSIGNED_TO_DESK_OFFICER",
+        "DESK_REVIEW_COMPLETED",
+        "HOD_HOU_REVIEWED",
+        "CLOSED"
+      ]
+    },
+    "public.Role": {
+      "name": "Role",
+      "schema": "public",
+      "values": [
+        "MAIL_ROOM",
+        "SECRETARY",
+        "DD",
+        "DESK_OFFICER",
+        "HOD_HOU",
+        "ADMIN"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
