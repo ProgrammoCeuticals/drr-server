@@ -3,7 +3,7 @@ import Submission from "../models/Submission.js";
 import XLSX from "xlsx";
 import { generateTrackingNumber } from "../utils/tracking.js";
 import { VALID_CHECK_VALUES, VALID_STATUSES } from "../utils/constants.js";
-import { sendStatusEmail } from "../utils/mailer.js";
+import { sendStatusEmail, sendLabReportEmail, sendSubmissionReceiptEmail } from "../utils/mailer.js";
 
 const NOTIFY_STATUSES = new Set(["RECEIVED", "REJECTED"]);
 
@@ -114,11 +114,16 @@ const MANIFEST_EXPORT_COLUMNS = [
   { header: "RISK FACTOR", code: RISK_FACTOR_FIELD_CODE },
   { header: "DATE SAMPLE RECEIVED", submissionKey: "sampleReceivedDate" },
   { header: "DATE TAKEN TO LAB", submissionKey: "takenToLabDate" },
-  { header: "DATE LAB REPORT RECEIVED", submissionKey: "labReportReceivedDate" },
+  {
+    header: "DATE LAB REPORT RECEIVED",
+    submissionKey: "labReportReceivedDate",
+  },
   { header: "LAB COMMENT", submissionKey: "labComment" },
 ];
 
-const MANIFEST_HEADER_SET = new Set(MANIFEST_EXPORT_COLUMNS.map((column) => column.header));
+const MANIFEST_HEADER_SET = new Set(
+  MANIFEST_EXPORT_COLUMNS.map((column) => column.header),
+);
 const REASON_TO_TEMPLATE_ID = {
   "new registration": "new_registration",
   registration: "new_registration",
@@ -169,10 +174,13 @@ function normalizeProductSampleAnswers(template, answers) {
 
   for (const item of template.productSample) {
     const value = incoming[item.code];
-    const cleanValue = typeof value === "string" ? value.trim() : `${value || ""}`.trim();
+    const cleanValue =
+      typeof value === "string" ? value.trim() : `${value || ""}`.trim();
     const defaultValue =
       typeof item.defaultValue === "string" ? item.defaultValue.trim() : "";
-    const resolvedValue = item.readOnly ? defaultValue : cleanValue || defaultValue;
+    const resolvedValue = item.readOnly
+      ? defaultValue
+      : cleanValue || defaultValue;
 
     if (item.required && !resolvedValue) {
       throw new Error(`Missing required product sample field: ${item.label}`);
@@ -199,16 +207,20 @@ function parseDateInput(rawValue, fieldLabel) {
 }
 
 function toUtcDateOnly(date) {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  return new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+  );
 }
 
 function addUtcMonths(date, months) {
   const day = date.getUTCDate();
-  const shifted = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
+  const shifted = new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1),
+  );
   shifted.setUTCMonth(shifted.getUTCMonth() + months);
 
   const lastDayOfTargetMonth = new Date(
-    Date.UTC(shifted.getUTCFullYear(), shifted.getUTCMonth() + 1, 0)
+    Date.UTC(shifted.getUTCFullYear(), shifted.getUTCMonth() + 1, 0),
   ).getUTCDate();
 
   shifted.setUTCDate(Math.min(day, lastDayOfTargetMonth));
@@ -225,13 +237,13 @@ function validateProductDateRules(productSampleAnswers) {
 
   const manufacturingDate = parseDateInput(
     manufacturingRaw,
-    "Product manufacturing date"
+    "Product manufacturing date",
   );
   const expiryDate = parseDateInput(expiryRaw, "Product expiration date");
 
   if (manufacturingDate >= expiryDate) {
     throw new Error(
-      "Sample cannot be registered because the product expiration date must be after the manufacturing date"
+      "Sample cannot be registered because the product expiration date must be after the manufacturing date",
     );
   }
 
@@ -242,11 +254,13 @@ function validateProductDateRules(productSampleAnswers) {
     const remainingDays = Math.floor((expiryDate - today) / DAY_IN_MS);
 
     if (remainingDays < 0) {
-      throw new Error("Sample cannot be registered because the product has already expired");
+      throw new Error(
+        "Sample cannot be registered because the product has already expired",
+      );
     }
 
     throw new Error(
-      "Sample cannot be registered because the product expiration date must be at least 6 months from today"
+      "Sample cannot be registered because the product expiration date must be at least 6 months from today",
     );
   }
 }
@@ -345,7 +359,8 @@ function buildManifestExcelRows(submissions) {
       }
 
       if (column.submissionKey) {
-        row[column.header] = `${submission?.[column.submissionKey] || ""}`.trim();
+        row[column.header] =
+          `${submission?.[column.submissionKey] || ""}`.trim();
         continue;
       }
 
@@ -370,9 +385,13 @@ function buildImportedProductSampleAnswers(row, template) {
   const answers = {};
 
   for (const item of template.productSample) {
-    const matchingColumn = MANIFEST_EXPORT_COLUMNS.find((column) => column.code === item.code);
+    const matchingColumn = MANIFEST_EXPORT_COLUMNS.find(
+      (column) => column.code === item.code,
+    );
     const manifestHeader = matchingColumn?.header;
-    answers[item.code] = manifestHeader ? `${row?.[manifestHeader] || ""}`.trim() : "";
+    answers[item.code] = manifestHeader
+      ? `${row?.[manifestHeader] || ""}`.trim()
+      : "";
   }
 
   return answers;
@@ -382,7 +401,12 @@ function getManifestRowValue(row, header) {
   return `${row?.[header] || ""}`.trim();
 }
 
-function buildImportedSubmissionPayload(row, template, trackingNumber, importedAt) {
+function buildImportedSubmissionPayload(
+  row,
+  template,
+  trackingNumber,
+  importedAt,
+) {
   const productSampleAnswers = buildImportedProductSampleAnswers(row, template);
 
   return {
@@ -446,10 +470,14 @@ function deriveProductName(answers) {
 }
 
 function applyOfficerDetails(submission, payload) {
-  const officerName = `${payload.officerName || submission.officerName || ""}`.trim();
-  const officerDesignation = `${payload.officerDesignation || submission.officerDesignation || ""}`.trim();
-  const officerPhone = `${payload.officerPhone || submission.officerPhone || ""}`.trim();
-  const officerEmail = `${payload.officerEmail || submission.officerEmail || ""}`.trim();
+  const officerName =
+    `${payload.officerName || submission.officerName || ""}`.trim();
+  const officerDesignation =
+    `${payload.officerDesignation || submission.officerDesignation || ""}`.trim();
+  const officerPhone =
+    `${payload.officerPhone || submission.officerPhone || ""}`.trim();
+  const officerEmail =
+    `${payload.officerEmail || submission.officerEmail || ""}`.trim();
 
   if (officerPhone && !PHONE_PATTERN.test(officerPhone)) {
     const error = new Error("Officer phone number is invalid");
@@ -470,7 +498,8 @@ function applyOfficerDetails(submission, payload) {
 }
 
 function applyNapamsNumber(submission, payload) {
-  submission.napamsNumber = `${payload.napamsNumber ?? submission.napamsNumber ?? ""}`.trim();
+  submission.napamsNumber =
+    `${payload.napamsNumber ?? submission.napamsNumber ?? ""}`.trim();
 }
 
 function parseStatus(value) {
@@ -508,22 +537,30 @@ function parseOptionalDateField(value, fieldLabel) {
 function applyMovementTracking(submission, payload) {
   submission.sampleReceivedDate = parseOptionalDateField(
     payload.sampleReceivedDate ?? submission.sampleReceivedDate,
-    "Date sample received"
+    "Date sample received",
   );
   submission.takenToLabDate = parseOptionalDateField(
     payload.takenToLabDate ?? submission.takenToLabDate,
-    "Date taken to lab"
+    "Date taken to lab",
   );
   submission.labReportReceivedDate = parseOptionalDateField(
     payload.labReportReceivedDate ?? submission.labReportReceivedDate,
-    "Date lab report received"
+    "Date lab report received",
   );
-  submission.labComment = `${payload.labComment ?? submission.labComment ?? ""}`.trim();
+  submission.labComment =
+    `${payload.labComment ?? submission.labComment ?? ""}`.trim();
 }
 
 async function createSubmission(req, res, next) {
   try {
-    const { templateId, applicantName, applicantPhone, applicantEmail, productName, productSampleAnswers } = req.body;
+    const {
+      templateId,
+      applicantName,
+      applicantPhone,
+      applicantEmail,
+      productName,
+      productSampleAnswers,
+    } = req.body;
 
     const template = await Template.findOne({ templateId });
     if (!template) {
@@ -531,14 +568,21 @@ async function createSubmission(req, res, next) {
       return;
     }
 
-    const normalizedAnswers = normalizeProductSampleAnswers(template, productSampleAnswers);
-    const cleanApplicantName = `${applicantName || deriveApplicantName(normalizedAnswers)}`.trim();
+    const normalizedAnswers = normalizeProductSampleAnswers(
+      template,
+      productSampleAnswers,
+    );
+    const cleanApplicantName =
+      `${applicantName || deriveApplicantName(normalizedAnswers)}`.trim();
     const cleanApplicantPhone = `${applicantPhone || ""}`.trim();
     const cleanApplicantEmail = `${applicantEmail || ""}`.trim();
-    const cleanProductName = `${productName || deriveProductName(normalizedAnswers)}`.trim();
+    const cleanProductName =
+      `${productName || deriveProductName(normalizedAnswers)}`.trim();
 
     if (!cleanApplicantName) {
-      res.status(400).json({ error: "A source, distributor, manufacturer, or brand name is required" });
+      res.status(400).json({
+        error: "A source, distributor, manufacturer, or brand name is required",
+      });
       return;
     }
 
@@ -554,26 +598,39 @@ async function createSubmission(req, res, next) {
 
     validateProductDateRules(normalizedAnswers);
 
-    const batchNumber = getAnswerValue(normalizedAnswers, BATCH_NUMBER_FIELD_CODE);
+    const batchNumber = getAnswerValue(
+      normalizedAnswers,
+      BATCH_NUMBER_FIELD_CODE,
+    );
     if (!batchNumber) {
       res.status(400).json({ error: "Batch number is required" });
       return;
     }
 
-    const reasonForAnalysis = getAnswerValue(normalizedAnswers, REASON_FOR_ANALYSIS_FIELD_CODE);
+    const reasonForAnalysis = getAnswerValue(
+      normalizedAnswers,
+      REASON_FOR_ANALYSIS_FIELD_CODE,
+    );
     if (!reasonForAnalysis) {
       res.status(400).json({ error: "Reason for analysis is required" });
       return;
     }
 
-    const existing = await Submission.findOne({ [`productSampleAnswers.${BATCH_NUMBER_FIELD_CODE}`]: batchNumber }).lean();
+    const existing = await Submission.findOne({
+      [`productSampleAnswers.${BATCH_NUMBER_FIELD_CODE}`]: batchNumber,
+    }).lean();
     if (existing) {
-      res.status(409).json({ error: `A submission with batch number "${batchNumber}" already exists (Tracking: ${existing.trackingNumber})` });
+      res.status(409).json({
+        error: `A submission with batch number "${batchNumber}" already exists (Tracking: ${existing.trackingNumber})`,
+      });
       return;
     }
 
     const now = new Date();
-    const trackingNumber = await generateTrackingNumber(template.templateId, now);
+    const trackingNumber = await generateTrackingNumber(
+      template.templateId,
+      now,
+    );
 
     const submission = await Submission.create({
       trackingNumber,
@@ -587,7 +644,7 @@ async function createSubmission(req, res, next) {
       documentsChecklist: buildDefaultDocumentChecklist(template),
       status: "RECEIVED",
       decisionRemark: "",
-      napamsNumber: getAnswerValue(normalizedAnswers, NAPAMS_NUMBER_FIELD_CODE),
+      napamsNumber: getAnswerValue(normalizedAnswers, NAFDAC_NUMBER_FIELD_CODE),
       reviewedBy: "",
       officerName: "",
       officerDesignation: "",
@@ -606,6 +663,19 @@ async function createSubmission(req, res, next) {
     });
 
     res.status(201).json({ submission: serializeSubmission(submission) });
+
+    if (submission.applicantEmail) {
+      sendSubmissionReceiptEmail({
+        to: submission.applicantEmail,
+        applicantName: submission.applicantName,
+        trackingNumber: submission.trackingNumber,
+        templateLabel: template.title || submission.templateId,
+        productName: submission.productName,
+        genericName: getAnswerValue(normalizedAnswers, GENERIC_NAME_FIELD_CODE),
+        batchNumber: getAnswerValue(normalizedAnswers, BATCH_NUMBER_FIELD_CODE),
+        submittedAt: submission.clientSubmittedAt,
+      }).catch(() => {});
+    }
   } catch (error) {
     next(error);
   }
@@ -621,12 +691,16 @@ async function importManifestRows(req, res, next) {
     }
 
     if (rows.length > 1000) {
-      res.status(400).json({ error: "Manifest import is limited to 1000 rows per upload" });
+      res
+        .status(400)
+        .json({ error: "Manifest import is limited to 1000 rows per upload" });
       return;
     }
 
     for (const [index, row] of rows.entries()) {
-      const unknownHeaders = Object.keys(row || {}).filter((header) => !MANIFEST_HEADER_SET.has(header));
+      const unknownHeaders = Object.keys(row || {}).filter(
+        (header) => !MANIFEST_HEADER_SET.has(header),
+      );
 
       if (unknownHeaders.length) {
         res.status(400).json({
@@ -639,18 +713,24 @@ async function importManifestRows(req, res, next) {
     const templateIds = Array.from(
       new Set(
         rows
-          .map((row) => normalizeReasonToTemplateId(row?.["REASON FOR ANALYSIS"]))
-          .filter(Boolean)
-      )
+          .map((row) =>
+            normalizeReasonToTemplateId(row?.["REASON FOR ANALYSIS"]),
+          )
+          .filter(Boolean),
+      ),
     );
 
     const templates = await Template.find({ templateId: { $in: templateIds } });
-    const templateMap = new Map(templates.map((template) => [template.templateId, template]));
+    const templateMap = new Map(
+      templates.map((template) => [template.templateId, template]),
+    );
     const importedAt = new Date();
     const payloads = [];
 
     for (const [index, row] of rows.entries()) {
-      const templateId = normalizeReasonToTemplateId(row?.["REASON FOR ANALYSIS"]);
+      const templateId = normalizeReasonToTemplateId(
+        row?.["REASON FOR ANALYSIS"],
+      );
       if (!templateId) {
         res.status(400).json({
           error: `Manifest row ${index + 1} has an unsupported reason for analysis`,
@@ -676,35 +756,57 @@ async function importManifestRows(req, res, next) {
       }
 
       if (!getManifestRowValue(row, "BATCH NO")) {
-        res.status(400).json({ error: `Manifest row ${index + 1} is missing a batch number` });
+        res.status(400).json({
+          error: `Manifest row ${index + 1} is missing a batch number`,
+        });
         return;
       }
 
       if (!getManifestRowValue(row, "REASON FOR ANALYSIS")) {
-        res.status(400).json({ error: `Manifest row ${index + 1} is missing a reason for analysis` });
+        res.status(400).json({
+          error: `Manifest row ${index + 1} is missing a reason for analysis`,
+        });
         return;
       }
 
-      const trackingNumber = await generateTrackingNumber(template.templateId, importedAt);
-      payloads.push(buildImportedSubmissionPayload(row, template, trackingNumber, importedAt));
+      const trackingNumber = await generateTrackingNumber(
+        template.templateId,
+        importedAt,
+      );
+      payloads.push(
+        buildImportedSubmissionPayload(
+          row,
+          template,
+          trackingNumber,
+          importedAt,
+        ),
+      );
     }
 
-    const incomingBatchNumbers = payloads
-      .map((p) => getAnswerValue(p.productSampleAnswers, BATCH_NUMBER_FIELD_CODE));
+    const incomingBatchNumbers = payloads.map((p) =>
+      getAnswerValue(p.productSampleAnswers, BATCH_NUMBER_FIELD_CODE),
+    );
 
     const existingDuplicates = await Submission.find({
-      [`productSampleAnswers.${BATCH_NUMBER_FIELD_CODE}`]: { $in: incomingBatchNumbers },
+      [`productSampleAnswers.${BATCH_NUMBER_FIELD_CODE}`]: {
+        $in: incomingBatchNumbers,
+      },
     })
       .select(`productSampleAnswers.${BATCH_NUMBER_FIELD_CODE} trackingNumber`)
       .lean();
 
     const existingBatchNumbers = new Set(
-      existingDuplicates.map((d) => normalizeMap(d.productSampleAnswers)[BATCH_NUMBER_FIELD_CODE])
+      existingDuplicates.map(
+        (d) => normalizeMap(d.productSampleAnswers)[BATCH_NUMBER_FIELD_CODE],
+      ),
     );
 
     const seenBatchNumbers = new Set();
     const filteredPayloads = payloads.filter((p) => {
-      const batchNo = getAnswerValue(p.productSampleAnswers, BATCH_NUMBER_FIELD_CODE);
+      const batchNo = getAnswerValue(
+        p.productSampleAnswers,
+        BATCH_NUMBER_FIELD_CODE,
+      );
       if (existingBatchNumbers.has(batchNo) || seenBatchNumbers.has(batchNo)) {
         return false;
       }
@@ -713,16 +815,23 @@ async function importManifestRows(req, res, next) {
     });
 
     if (!filteredPayloads.length) {
-      res.status(409).json({ error: "All rows in this manifest already exist in the register (duplicate batch numbers)." });
+      res.status(409).json({
+        error:
+          "All rows in this manifest already exist in the register (duplicate batch numbers).",
+      });
       return;
     }
 
-    const submissions = await Submission.insertMany(filteredPayloads, { ordered: true });
+    const submissions = await Submission.insertMany(filteredPayloads, {
+      ordered: true,
+    });
 
     res.status(201).json({
       importedCount: submissions.length,
       skippedCount: payloads.length - filteredPayloads.length,
-      submissions: submissions.map((submission) => serializeSubmission(submission)),
+      submissions: submissions.map((submission) =>
+        serializeSubmission(submission),
+      ),
     });
   } catch (error) {
     next(error);
@@ -755,7 +864,7 @@ async function listSubmissions(req, res, next) {
     const submissions = await Submission.find(filters)
       .sort({ createdAt: -1 })
       .select(
-        "trackingNumber templateId applicantName applicantPhone productName productSampleAnswers status createdAt updatedAt templateSnapshot.title napamsNumber reviewedBy labComment decisionRemark sampleReceivedDate"
+        "trackingNumber templateId applicantName applicantPhone productName productSampleAnswers status createdAt updatedAt templateSnapshot.title napamsNumber reviewedBy labComment decisionRemark sampleReceivedDate",
       )
       .lean();
 
@@ -773,7 +882,8 @@ async function listSubmissions(req, res, next) {
           getAnswerValue(answers, SOURCE_FIELD_CODE) ||
           item.applicantName,
         applicantPhone: item.applicantPhone || "",
-        productName: getAnswerValue(answers, BRAND_NAME_FIELD_CODE) || item.productName,
+        productName:
+          getAnswerValue(answers, BRAND_NAME_FIELD_CODE) || item.productName,
         genericName: getAnswerValue(answers, GENERIC_NAME_FIELD_CODE),
         dosageForm: getAnswerValue(answers, DOSAGE_FORM_FIELD_CODE),
         batchNumber: getAnswerValue(answers, BATCH_NUMBER_FIELD_CODE),
@@ -787,7 +897,10 @@ async function listSubmissions(req, res, next) {
         distributor:
           getAnswerValue(answers, DISTRIBUTOR_FIELD_CODE) ||
           getAnswerValue(answers, SOURCE_FIELD_CODE),
-        reasonForAnalysis: getAnswerValue(answers, REASON_FOR_ANALYSIS_FIELD_CODE),
+        reasonForAnalysis: getAnswerValue(
+          answers,
+          REASON_FOR_ANALYSIS_FIELD_CODE,
+        ),
         labComment: item.labComment || "",
         matchScore: scoreSubmissionSearchMatch(item, q),
       };
@@ -799,7 +912,10 @@ async function listSubmissions(req, res, next) {
           return right.matchScore - left.matchScore;
         }
 
-        return new Date(right.updatedAt || 0).getTime() - new Date(left.updatedAt || 0).getTime();
+        return (
+          new Date(right.updatedAt || 0).getTime() -
+          new Date(left.updatedAt || 0).getTime()
+        );
       });
     }
 
@@ -833,21 +949,27 @@ async function updateDocumentsChecklist(req, res, next) {
       return;
     }
 
-    const checklistUpdates = Array.isArray(req.body.checklist) ? req.body.checklist : [];
-    const updateMap = new Map(checklistUpdates.map((item) => [item.code, item]));
+    const checklistUpdates = Array.isArray(req.body.checklist)
+      ? req.body.checklist
+      : [];
+    const updateMap = new Map(
+      checklistUpdates.map((item) => [item.code, item]),
+    );
 
-    submission.documentsChecklist = submission.documentsChecklist.map((entry) => {
-      const update = updateMap.get(entry.code);
-      if (!update) {
-        return entry;
-      }
+    submission.documentsChecklist = submission.documentsChecklist.map(
+      (entry) => {
+        const update = updateMap.get(entry.code);
+        if (!update) {
+          return entry;
+        }
 
-      return {
-        ...entry.toObject(),
-        status: parseChecklistStatus(update.status || entry.status),
-        remark: `${update.remark || ""}`.trim(),
-      };
-    });
+        return {
+          ...entry.toObject(),
+          status: parseChecklistStatus(update.status || entry.status),
+          remark: `${update.remark || ""}`.trim(),
+        };
+      },
+    );
 
     const currentStatus = `${submission.status || ""}`.toUpperCase();
     const nextStatus = req.body.status
@@ -855,33 +977,68 @@ async function updateDocumentsChecklist(req, res, next) {
       : VALID_STATUSES.includes(currentStatus)
         ? currentStatus
         : "RECEIVED";
-    const decisionRemark = `${req.body.decisionRemark || submission.decisionRemark || ""}`.trim();
+    const decisionRemark =
+      `${req.body.decisionRemark || submission.decisionRemark || ""}`.trim();
 
     if (nextStatus === "REJECTED" && !decisionRemark) {
-      res.status(400).json({ error: "Rejection reason is required when status is REJECTED" });
+      res.status(400).json({
+        error: "Rejection reason is required when status is REJECTED",
+      });
       return;
     }
 
     const previousStatus = submission.status;
+    const previousLabReportDate = submission.labReportReceivedDate || "";
+
     submission.status = nextStatus;
     submission.decisionRemark = nextStatus === "REJECTED" ? decisionRemark : "";
 
     applyNapamsNumber(submission, req.body);
-    submission.reviewedBy = `${req.body.reviewedBy || submission.reviewedBy || ""}`.trim();
+    submission.reviewedBy =
+      `${req.body.reviewedBy || submission.reviewedBy || ""}`.trim();
     applyOfficerDetails(submission, req.body);
     applyMovementTracking(submission, req.body);
+
+    const quantityOverride = `${req.body.quantityOverride ?? ""}`.trim();
+    if (quantityOverride !== "") {
+      const parsed = Number(quantityOverride);
+      if (!Number.isFinite(parsed) || parsed < 0) {
+        const error = new Error("Quantity must be a non-negative number");
+        error.statusCode = 400;
+        throw error;
+      }
+      const answers = normalizeMap(submission.productSampleAnswers);
+      answers[QUANTITY_FIELD_CODE] = quantityOverride;
+      submission.productSampleAnswers = answers;
+    }
+
     submission.adminReviewedAt = new Date();
 
     await submission.save();
 
-    if (NOTIFY_STATUSES.has(nextStatus) && nextStatus !== previousStatus && submission.applicantEmail) {
-      sendStatusEmail({
-        to: submission.applicantEmail,
-        applicantName: submission.applicantName,
-        trackingNumber: submission.trackingNumber,
-        status: nextStatus,
-        decisionRemark: submission.decisionRemark,
-      }).catch(() => {});
+    if (submission.applicantEmail) {
+      if (NOTIFY_STATUSES.has(nextStatus) && nextStatus !== previousStatus) {
+        sendStatusEmail({
+          to: submission.applicantEmail,
+          applicantName: submission.applicantName,
+          trackingNumber: submission.trackingNumber,
+          status: nextStatus,
+          decisionRemark: submission.decisionRemark,
+        }).catch(() => {});
+      }
+
+      if (
+        submission.labReportReceivedDate &&
+        submission.labReportReceivedDate !== previousLabReportDate
+      ) {
+        sendLabReportEmail({
+          to: submission.applicantEmail,
+          applicantName: submission.applicantName,
+          trackingNumber: submission.trackingNumber,
+          labReportReceivedDate: submission.labReportReceivedDate,
+          labComment: submission.labComment,
+        }).catch(() => {});
+      }
     }
 
     res.json({ submission: serializeSubmission(submission) });
@@ -900,10 +1057,13 @@ async function updateSubmissionStatus(req, res, next) {
     }
 
     const nextStatus = parseStatus(req.body.status);
-    const decisionRemark = `${req.body.decisionRemark || submission.decisionRemark || ""}`.trim();
+    const decisionRemark =
+      `${req.body.decisionRemark || submission.decisionRemark || ""}`.trim();
 
     if (nextStatus === "REJECTED" && !decisionRemark) {
-      res.status(400).json({ error: "Rejection reason is required when status is REJECTED" });
+      res.status(400).json({
+        error: "Rejection reason is required when status is REJECTED",
+      });
       return;
     }
 
@@ -911,14 +1071,19 @@ async function updateSubmissionStatus(req, res, next) {
     submission.status = nextStatus;
     submission.decisionRemark = nextStatus === "REJECTED" ? decisionRemark : "";
     applyNapamsNumber(submission, req.body);
-    submission.reviewedBy = `${req.body.reviewedBy || submission.reviewedBy || ""}`.trim();
+    submission.reviewedBy =
+      `${req.body.reviewedBy || submission.reviewedBy || ""}`.trim();
     applyOfficerDetails(submission, req.body);
     applyMovementTracking(submission, req.body);
     submission.adminReviewedAt = new Date();
 
     await submission.save();
 
-    if (NOTIFY_STATUSES.has(nextStatus) && nextStatus !== previousStatus && submission.applicantEmail) {
+    if (
+      NOTIFY_STATUSES.has(nextStatus) &&
+      nextStatus !== previousStatus &&
+      submission.applicantEmail
+    ) {
       sendStatusEmail({
         to: submission.applicantEmail,
         applicantName: submission.applicantName,
@@ -975,20 +1140,22 @@ function buildAllSubmissionsExcelRows(submissions) {
     }
   }
 
-  const orderedSampleCodes = Array.from(sampleCodes).sort((left, right) => left.localeCompare(right));
+  const orderedSampleCodes = Array.from(sampleCodes).sort((left, right) =>
+    left.localeCompare(right),
+  );
   const orderedChecklistCodes = Array.from(checklistCodes).sort((left, right) =>
-    left.localeCompare(right)
+    left.localeCompare(right),
   );
 
   return submissions.map((submission) => {
     const answers = normalizeMap(submission.productSampleAnswers || {});
     const checklistEntries = new Map(
-      (submission.documentsChecklist || []).map((entry) => [entry.code, entry])
+      (submission.documentsChecklist || []).map((entry) => [entry.code, entry]),
     );
 
     const row = {
       "Tracking Number": submission.trackingNumber || "",
-      "NAPAMS Number": submission.napamsNumber || "",
+      "NAPAMS Number": submission.napamsNumber || "NIL",
       "Template ID": submission.templateId || "",
       "Template Title": submission.templateSnapshot?.title || "",
       "Applicant Name": submission.applicantName || "",
@@ -1015,8 +1182,12 @@ function buildAllSubmissionsExcelRows(submissions) {
       "Date Lab Report Received": submission.labReportReceivedDate || "",
       "Lab Comment": submission.labComment || "",
       "Rejection Reason": submission.decisionRemark || "",
-      "Created At": submission.createdAt ? new Date(submission.createdAt).toISOString() : "",
-      "Updated At": submission.updatedAt ? new Date(submission.updatedAt).toISOString() : "",
+      "Created At": submission.createdAt
+        ? new Date(submission.createdAt).toISOString()
+        : "",
+      "Updated At": submission.updatedAt
+        ? new Date(submission.updatedAt).toISOString()
+        : "",
     };
 
     for (const code of orderedSampleCodes) {
@@ -1046,10 +1217,16 @@ async function exportAllSubmissionsToExcel(req, res, next) {
     const auditRows = buildAllSubmissionsExcelRows(submissions);
 
     const manifestWorksheet = XLSX.utils.json_to_sheet(
-      manifestRows.length ? manifestRows : [Object.fromEntries(MANIFEST_EXPORT_COLUMNS.map((column) => [column.header, ""]))]
+      manifestRows.length
+        ? manifestRows
+        : [
+            Object.fromEntries(
+              MANIFEST_EXPORT_COLUMNS.map((column) => [column.header, ""]),
+            ),
+          ],
     );
     const auditWorksheet = XLSX.utils.json_to_sheet(
-      auditRows.length ? auditRows : [{ Note: "No submissions available" }]
+      auditRows.length ? auditRows : [{ Note: "No submissions available" }],
     );
 
     XLSX.utils.book_append_sheet(workbook, manifestWorksheet, "Manifest");
@@ -1063,11 +1240,11 @@ async function exportAllSubmissionsToExcel(req, res, next) {
     const dateTag = new Date().toISOString().slice(0, 10);
     res.setHeader(
       "Content-Type",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     );
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename="samples-submissions-${dateTag}.xlsx"`
+      `attachment; filename="samples-submissions-${dateTag}.xlsx"`,
     );
     res.send(fileBuffer);
   } catch (error) {
