@@ -44,7 +44,8 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(morgan("dev"));
 
-// ── Health ────────────────────────────────────────────────────────────────────
+// ── Root / Health ─────────────────────────────────────────────────────────────
+app.get("/", (_req, res) => res.json({ ok: true, message: "Shared server is live", services: ["drr", "samples"] }));
 app.get("/health", (_req, res) => res.json({ ok: true, services: ["drr", "samples"] }));
 
 // ── DRR routes (/api/*) ───────────────────────────────────────────────────────
